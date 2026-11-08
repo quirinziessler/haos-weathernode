@@ -1,0 +1,29 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "platformAutomerge": true,
+  "packageRules": [
+    {
+      "description": "Group Dockerfile base image and Home Assistant config.yaml version updates with hands-off auto-merge",
+      "matchPackageNames": ["ghcr.io/centauri/weathernode"],
+      "groupName": "WeatherNode upstream updates",
+      "automerge": true,
+      "platformAutomerge": true,
+      "ignoreTests": true
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update version in Home Assistant config.yaml to mirror WeatherNode Docker image updates",
+      "fileMatch": ["(^|/)weathernode/config\\.ya?ml$"],
+      "matchStrings": [
+        "version:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "depNameTemplate": "ghcr.io/centauri/weathernode",
+      "datasourceTemplate": "docker"
+    }
+  ]
+}

@@ -118,13 +118,25 @@ class HomeAssistantIngressMiddleware
                     $content = preg_replace($pattern, '$1' . $ingressPath . '/', $content);
 
                     // Inject helper script to route frontend AJAX calls (Axios, Fetch, XHR, History) through Ingress
+                    // and suppress cookie banners and project notices
                     $encodedIngress = json_encode($ingressPath);
-                    $helperScript = "<script>
+                    $helperScript = "<style>
+[x-show=\"showCookieBanner\"], [x-show=\"showCookieSettingsModal\"], .cookie-banner, #cookie-banner { display: none !important; }
+</style>
+<script>
 window.__HA_INGRESS_PATH__ = {$encodedIngress};
 if (window.axios) { window.axios.defaults.baseURL = {$encodedIngress}; }
 (function() {
     var prefix = {$encodedIngress};
     
+    // Auto-accept cookie/ads consent so dialogs never trigger
+    try {
+        localStorage.setItem('meteo_ads_consent', 'accepted');
+        localStorage.setItem('cookie_consent', 'accepted');
+        localStorage.setItem('meteo_consent_version', '1');
+        document.cookie = 'meteo_ads_consent=accepted; path=/; max-age=31536000';
+    } catch(e) {}
+
     // Intercept Fetch API
     var origFetch = window.fetch;
     if (origFetch) {
@@ -175,6 +187,9 @@ if (window.axios) { window.axios.defaults.baseURL = {$encodedIngress}; }
                     $response->setContent($content);
                 }
             }
+
+            // Set cookie consent header
+            $response->headers->setCookie(new \Symfony\Component\HttpFoundation\Cookie('meteo_ads_consent', 'accepted', time() + 31536000, '/', null, false, false));
         }
 
         return $response;

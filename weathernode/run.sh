@@ -59,11 +59,14 @@ if id "www-data" >/dev/null 2>&1; then
     chown -R www-data:www-data /data || true
 fi
 
-# 6. Fallback default command if none supplied
+# 6. Clear any stale compiled views so updated templates take effect immediately
+rm -f /var/www/html/storage/framework/views/*.php 2>/dev/null || true
+
+# 7. Fallback default command if none supplied
 if [ $# -eq 0 ]; then
     set -- /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 fi
 
-# 7. Hand over control to the upstream WeatherNode entrypoint
+# 8. Hand over control to the upstream WeatherNode entrypoint
 echo "[WeatherNode] Handing over execution to upstream entrypoint: /var/www/html/docker/entrypoint.sh"
 exec /var/www/html/docker/entrypoint.sh "$@"

@@ -3,8 +3,8 @@ configuration:
     name: "Application Name"
     description: "The name displayed in page titles and navigation."
   APP_URL:
-    name: "Application URL"
-    description: "The full external URL you use to access WeatherNode (e.g., http://homeassistant.local:8080 or your reverse proxy domain)."
+    name: "External Application URL (Optional)"
+    description: "The external URL if accessing WeatherNode directly or through an external reverse proxy. Not needed when using the Home Assistant sidebar Ingress."
   APP_KEY:
     name: "Application Encryption Key"
     description: "Required. 32-byte base64 encryption key (format: base64:...). Keep this backed up; if changed, saved encrypted tokens will be invalidated."
@@ -24,14 +24,14 @@ configuration:
     name: "Log Channel"
     description: "Where application logs are sent. 'stderr' sends them to Home Assistant add-on logs."
   ADMIN_EMAIL:
-    name: "First-run Admin Email (Optional)"
-    description: "Email address for automatic initial administrator account creation on first boot."
+    name: "Admin Email (Optional)"
+    description: "Email address for the administrator account. If omitted, defaults to admin@homeassistant.local with automatic Ingress single sign-on."
   ADMIN_PASSWORD:
-    name: "First-run Admin Password (Optional)"
-    description: "Password for the initial administrator account. Can also be set manually in browser at /setup/admin."
+    name: "Admin Password (Optional)"
+    description: "Password for the administrator account. If omitted, a secure random password is generated; you will be logged in automatically via Home Assistant Ingress."
   TRUSTED_PROXIES:
     name: "Trusted Proxies"
     description: "Proxies to trust for client IP and HTTPS headers (set to '*' or specific CIDR)."
   UPDATER_ENABLED:
     name: "In-App Updater"
-    description: "Enable or disable in-app updater button. Set to false since container updates are handled automatically via Renovate."
+    description: "Enable or disable in-app updater button. Keep disabled as container updates are handled automatically via Renovate."

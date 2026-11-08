@@ -24,15 +24,28 @@ else
     echo "[WeatherNode] Warning: ${OPTIONS_FILE} not found. Running with default environment."
 fi
 
-# 2. Hardcode persistent backend settings (cannot be overridden via UI)
+# 2. Guarantee Admin user credentials for direct Home Assistant Ingress access
+if [ -z "$ADMIN_EMAIL" ]; then
+    export ADMIN_EMAIL="admin@homeassistant.local"
+fi
+if [ -z "$ADMIN_PASSWORD" ]; then
+    # Generate a secure 24-character random password if not explicitly set in options
+    export ADMIN_PASSWORD=$(head -c 32 /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 24)
+fi
+if [ -z "$ADMIN_NAME" ]; then
+    export ADMIN_NAME="Home Assistant Admin"
+fi
+
+# 3. Hardcode persistent backend settings (cannot be overridden via UI)
 export DB_CONNECTION="sqlite"
 export DB_DATABASE="/data/weathernode.sqlite"
 export DOCKER_RUN_SCHEDULER="true"
 
 echo "[WeatherNode] Database connection configured to SQLite at ${DB_DATABASE}"
 echo "[WeatherNode] Background scheduler execution enabled (DOCKER_RUN_SCHEDULER=true)"
+echo "[WeatherNode] Ingress Administrator configured for seamless Home Assistant access (${ADMIN_EMAIL})"
 
-# 3. Ensure persistent storage path and SQLite database exist with writable permissions
+# 4. Ensure persistent storage path and SQLite database exist with writable permissions
 mkdir -p /data
 touch /data/weathernode.sqlite
 chmod 775 /data || true
@@ -42,11 +55,11 @@ if id "www-data" >/dev/null 2>&1; then
     chown -R www-data:www-data /data || true
 fi
 
-# 4. Fallback default command if none supplied
+# 5. Fallback default command if none supplied
 if [ $# -eq 0 ]; then
     set -- /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 fi
 
-# 5. Hand over control to the upstream WeatherNode entrypoint
+# 6. Hand over control to the upstream WeatherNode entrypoint
 echo "[WeatherNode] Handing over execution to upstream entrypoint: /var/www/html/docker/entrypoint.sh"
 exec /var/www/html/docker/entrypoint.sh "$@"

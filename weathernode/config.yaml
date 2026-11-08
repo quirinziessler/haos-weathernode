@@ -10,16 +10,25 @@ arch:
 startup: "application"
 boot: "auto"
 init: false
+
+# Home Assistant Ingress & Sidebar Menu configuration
+# Automatically enables sidebar integration and single sign-on as administrator
+ingress: true
+ingress_port: 80
+ingress_entry: "/"
+panel_icon: "mdi:weather-partly-cloudy"
+panel_title: "WeatherNode"
+panel_admin: true
+
+# Optional direct port mapping for weather stations (Ecowitt, Wunderground, etc.)
 ports:
   80/tcp: 8080
 ports_description:
-  80/tcp: "WeatherNode Web Interface"
-webui: "http://[HOST]:[PORT:8080]"
+  80/tcp: "Weather Station Webhook & Direct Access (optional)"
 
 # UI Configuration options exposed to the user in Home Assistant Web UI
 options:
   APP_NAME: "WeatherNode"
-  APP_URL: "http://homeassistant.local:8080"
   APP_KEY: "base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
   APP_TIMEZONE: "UTC"
   APP_LOCALE: "en"
@@ -36,7 +45,7 @@ options:
 # uneditable in the UI and safely hardcoded in run.sh.
 schema:
   APP_NAME: "str?"
-  APP_URL: "url"
+  APP_URL: "url?"
   APP_KEY: "match(^base64:[A-Za-z0-9+/=]{40,}$)"
   APP_TIMEZONE: "str?"
   APP_LOCALE: "list(en|de|fr|es|it|nl)?"

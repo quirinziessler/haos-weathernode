@@ -3,7 +3,7 @@ slug: "weathernode"
 description: "Open source, self-hosted weather dashboard and station aggregator"
 url: "https://github.com/quirinziessler/haos-weathernode"
 # renovate: datasource=docker depName=ghcr.io/centauri/weathernode
-version: "v2026.10.3-ha2"
+version: "v2026.10.3-ha3"
 arch:
   - aarch64
   - amd64
@@ -29,6 +29,7 @@ ports_description:
 # UI Configuration options exposed to the user in Home Assistant Web UI
 options:
   APP_NAME: "WeatherNode"
+  APP_URL: "http://homeassistant.local:8080"
   APP_KEY: "base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
   APP_TIMEZONE: "UTC"
   APP_LOCALE: "en"

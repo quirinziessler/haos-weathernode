@@ -37,11 +37,6 @@ if [ -z "$ADMIN_NAME" ]; then
 fi
 
 # 3. Dynamic URL and Cookie Handling
-# If APP_URL is empty or default localhost, unset it so Laravel dynamically uses the request host
-if [ -z "$APP_URL" ] || [ "$APP_URL" = "http://localhost" ] || [ "$APP_URL" = "https://localhost" ]; then
-    unset APP_URL
-fi
-
 # Ensure session cookies work across plain HTTP and Home Assistant Ingress
 export SESSION_SECURE_COOKIE="false"
 

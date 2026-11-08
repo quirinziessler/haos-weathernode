@@ -93,7 +93,6 @@ if (file_exists($aspFile)) {
         echo "[patch] AppServiceProvider.php updated successfully.\n";
     } else {
         echo "[patch] Warning: exact origBlock not matched in AppServiceProvider.php, trying regex fallback...\n";
-        // Fallback regex matching the if (! app()->runningInConsole()) block
         $pattern = '/if \(! app\(\)->runningInConsole\(\)\) \{.*?URL::forceScheme\(\$scheme\);\s*\}\s*\}\s*\}/s';
         if (preg_match($pattern, $code)) {
             $code = preg_replace($pattern, $newBlock, $code);
@@ -129,6 +128,30 @@ if (file_exists($secFile)) {
     );
     file_put_contents($secFile, $code);
     echo "[patch] SecurityHeaders.php updated to allow Ingress iframes.\n";
+}
+
+// 4. Patch Nginx fastcgi config to preserve client port in HTTP_HOST
+$nginxSites = ['/etc/nginx/sites-available/default', '/etc/nginx/sites-enabled/default'];
+foreach ($nginxSites as $siteFile) {
+    if (file_exists($siteFile)) {
+        $code = file_get_contents($siteFile);
+        if (!str_contains($code, 'fastcgi_param HTTP_HOST $http_host;')) {
+            $code = str_replace(
+                'include fastcgi_params;',
+                "include fastcgi_params;\n        fastcgi_param HTTP_HOST \$http_host;",
+                $code
+            );
+            file_put_contents($siteFile, $code);
+            echo "[patch] {$siteFile} updated with fastcgi_param HTTP_HOST \$http_host.\n";
+        }
+    }
+}
+$fastcgiConf = '/etc/nginx/fastcgi_params';
+if (file_exists($fastcgiConf)) {
+    $code = file_get_contents($fastcgiConf);
+    $code = preg_replace('/fastcgi_param\s+HTTP_HOST\s+\$host;/', 'fastcgi_param  HTTP_HOST          $http_host;', $code);
+    file_put_contents($fastcgiConf, $code);
+    echo "[patch] {$fastcgiConf} updated.\n";
 }
 
 echo "[patch] All patches applied successfully.\n";

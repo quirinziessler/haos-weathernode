@@ -70,9 +70,9 @@ class HomeAssistantIngressMiddleware
             if ($contentType && str_contains($contentType, 'text/html')) {
                 $content = $response->getContent();
                 if ($content) {
-                    $escaped = preg_quote($ingressPath, '/');
+                    $clean = ltrim($ingressPath, '/');
                     // Match href="/...", src="/...", action="/..." not starting with // or the ingress path
-                    $pattern = '/((?:href|src|action)=["\'])\/(?!\/|' . substr($escaped, 1) . ')/i';
+                    $pattern = '#((?:href|src|action)=["\'])/(?!/|' . preg_quote($clean, '#') . ')#i';
                     $content = preg_replace($pattern, '$1' . $ingressPath . '/', $content);
 
                     // Inject helper script to route frontend AJAX calls (Axios and Fetch) through Ingress

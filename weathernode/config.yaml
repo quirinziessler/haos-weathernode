@@ -3,7 +3,7 @@ slug: "weathernode"
 description: "Open source, self-hosted weather dashboard and station aggregator"
 url: "https://github.com/quirinziessler/haos-weathernode"
 # renovate: datasource=docker depName=ghcr.io/centauri/weathernode
-version: "v2026.10.3-ha1"
+version: "v2026.10.3-ha2"
 arch:
   - aarch64
   - amd64

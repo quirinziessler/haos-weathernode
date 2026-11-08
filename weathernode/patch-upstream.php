@@ -160,17 +160,27 @@ if (file_exists($dashboardFile)) {
     $code = file_get_contents($dashboardFile);
     $code = str_replace('x-show="showCookieBanner"', 'x-show="false"', $code);
     $code = str_replace('x-show="showCookieSettingsModal"', 'x-show="false"', $code);
+    // Add CSS guard to prevent any display flicker on direct port or reverse-proxy access
+    $guardStyle = "<style>[x-show*=\"showCookie\"], .cookie-banner, #cookie-banner, [aria-label*=\"cookie\" i] { display: none !important; }</style>\n";
+    $code = $guardStyle . $code;
     file_put_contents($dashboardFile, $code);
     echo "[patch] dashboard.blade.php updated: cookie banner and settings modal disabled.\n";
 }
 
-// 6. Patch Blade templates: Remove project notices & WeatherNode links in footer
+// 6. Patch Blade templates: Remove project notices & WeatherNode links in footer while preserving license under Legal
 $footerFile = '/var/www/html/resources/views/weather/partials/footer.blade.php';
 if (file_exists($footerFile)) {
     $code = file_get_contents($footerFile);
 
     // Disable cookie settings link in footer
     $code = preg_replace('/\$showCookieSettingsLink\s*=\s*.*?;/s', '$showCookieSettingsLink = false;', $code);
+
+    // Ensure License link is preserved under Legal section (AGPL-3.0 compliance)
+    if (!str_contains($code, "route('legal.license')") || strpos($code, "route('legal.license')") > strpos($code, "<!-- WeatherNode & Project Links")) {
+        $aboutPattern = '#(<a href="\{\{\s*route\(\'legal\.about\'\)\s*\}\}"[^>]*>.*?</a>\s*</li>)#s';
+        $licenseItem = "$1\n                    <li>\n                        <a href=\"{{ route('legal.license') }}\" class=\"text-sm text-ui-muted hover:text-ui-fg transition-colors\">\n                            {{ __('License') }}\n                        </a>\n                    </li>";
+        $code = preg_replace($aboutPattern, $licenseItem, $code);
+    }
 
     // Remove the hardcoded "Project" section
     $patternProject = '#<!-- WeatherNode & Project Links \(Always Visible\) -->\s*<div>\s*<h3[^>]*>\{\{\s*__\([\'"]Project[\'"]\)\s*\}\}</h3>.*?</ul>\s*</div>#s';
@@ -185,7 +195,7 @@ if (file_exists($footerFile)) {
     $code = preg_replace($patternMinimal, '', $code);
 
     file_put_contents($footerFile, $code);
-    echo "[patch] footer.blade.php updated: project links, Powered by, and cookie settings removed.\n";
+    echo "[patch] footer.blade.php updated: project links, Powered by, and cookie settings removed (License retained under Legal).\n";
 }
 
 // 7. Patch Blade templates: Suppress in-app update notice (managed by Home Assistant)

@@ -18,11 +18,16 @@ webui: "http://[HOST]:[PORT:8080]"
 
 # UI Configuration options exposed to the user in Home Assistant Web UI
 options:
+  APP_NAME: "WeatherNode"
   APP_URL: "http://homeassistant.local:8080"
   APP_KEY: "base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA="
+  APP_TIMEZONE: "UTC"
+  APP_LOCALE: "en"
   APP_ENV: "production"
   APP_DEBUG: false
   LOG_CHANNEL: "stderr"
+  TRUSTED_PROXIES: "*"
+  UPDATER_ENABLED: false
 
 # Validation schema for Home Assistant Web UI options
 # Note: APP_KEY is required and must begin with 'base64:' followed by valid base64 characters.
@@ -30,10 +35,15 @@ options:
 # and DOCKER_RUN_SCHEDULER=true) are intentionally omitted from this schema to keep them
 # uneditable in the UI and safely hardcoded in run.sh.
 schema:
+  APP_NAME: "str?"
   APP_URL: "url"
   APP_KEY: "match(^base64:[A-Za-z0-9+/=]{40,}$)"
+  APP_TIMEZONE: "str?"
+  APP_LOCALE: "list(en|de|fr|es|it|nl)?"
   APP_ENV: "list(production|local|testing)"
   APP_DEBUG: "bool"
   LOG_CHANNEL: "list(stderr|stack|single|daily)"
   ADMIN_EMAIL: "email?"
   ADMIN_PASSWORD: "password?"
+  TRUSTED_PROXIES: "str?"
+  UPDATER_ENABLED: "bool?"

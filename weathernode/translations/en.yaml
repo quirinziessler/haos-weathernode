@@ -1,0 +1,37 @@
+configuration:
+  APP_NAME:
+    name: "Application Name"
+    description: "The name displayed in page titles and navigation."
+  APP_URL:
+    name: "Application URL"
+    description: "The full external URL you use to access WeatherNode (e.g., http://homeassistant.local:8080 or your reverse proxy domain)."
+  APP_KEY:
+    name: "Application Encryption Key"
+    description: "Required. 32-byte base64 encryption key (format: base64:...). Keep this backed up; if changed, saved encrypted tokens will be invalidated."
+  APP_TIMEZONE:
+    name: "Timezone"
+    description: "Timezone for calculations and timestamps (e.g. UTC, Europe/Berlin, America/New_York)."
+  APP_LOCALE:
+    name: "Language / Locale"
+    description: "Application display language."
+  APP_ENV:
+    name: "Environment"
+    description: "Runtime environment mode (production, local, or testing)."
+  APP_DEBUG:
+    name: "Debug Mode"
+    description: "Enable verbose debugging traces. Leave disabled in normal operation."
+  LOG_CHANNEL:
+    name: "Log Channel"
+    description: "Where application logs are sent. 'stderr' sends them to Home Assistant add-on logs."
+  ADMIN_EMAIL:
+    name: "First-run Admin Email (Optional)"
+    description: "Email address for automatic initial administrator account creation on first boot."
+  ADMIN_PASSWORD:
+    name: "First-run Admin Password (Optional)"
+    description: "Password for the initial administrator account. Can also be set manually in browser at /setup/admin."
+  TRUSTED_PROXIES:
+    name: "Trusted Proxies"
+    description: "Proxies to trust for client IP and HTTPS headers (set to '*' or specific CIDR)."
+  UPDATER_ENABLED:
+    name: "In-App Updater"
+    description: "Enable or disable in-app updater button. Set to false since container updates are handled automatically via Renovate."

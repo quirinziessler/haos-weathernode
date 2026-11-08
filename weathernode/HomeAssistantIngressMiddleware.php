@@ -21,7 +21,7 @@ class HomeAssistantIngressMiddleware
      *    directly in the WeatherNode interface without needing a second login screen.
      * 4. Strips X-Frame-Options and adjusts frame-ancestors to permit embedding in the
      *    Home Assistant sidebar iframe.
-     * 5. Rewrites root-relative links in HTML responses to keep internal navigation within Ingress.
+     * 5. Rewrites root-relative links in HTML responses and injects fetch/axios Ingress handlers.
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -74,6 +74,28 @@ class HomeAssistantIngressMiddleware
                     // Match href="/...", src="/...", action="/..." not starting with // or the ingress path
                     $pattern = '/((?:href|src|action)=["\'])\/(?!\/|' . substr($escaped, 1) . ')/i';
                     $content = preg_replace($pattern, '$1' . $ingressPath . '/', $content);
+
+                    // Inject helper script to route frontend AJAX calls (Axios and Fetch) through Ingress
+                    $encodedIngress = json_encode($ingressPath);
+                    $helperScript = "<script>
+window.__HA_INGRESS_PATH__ = {$encodedIngress};
+if (window.axios) { window.axios.defaults.baseURL = {$encodedIngress}; }
+(function() {
+    var origFetch = window.fetch;
+    window.fetch = function(url, options) {
+        if (typeof url === 'string' && url.charAt(0) === '/' && url.charAt(1) !== '/' && !url.startsWith({$encodedIngress})) {
+            url = {$encodedIngress} + url;
+        }
+        return origFetch.apply(this, [url, options]);
+    };
+})();
+</script>";
+                    if (str_contains($content, '</head>')) {
+                        $content = str_replace('</head>', $helperScript . '</head>', $content);
+                    } elseif (str_contains($content, '</body>')) {
+                        $content = str_replace('</body>', $helperScript . '</body>', $content);
+                    }
+
                     $response->setContent($content);
                 }
             }

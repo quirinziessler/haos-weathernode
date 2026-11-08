@@ -36,7 +36,16 @@ if [ -z "$ADMIN_NAME" ]; then
     export ADMIN_NAME="Home Assistant Admin"
 fi
 
-# 3. Hardcode persistent backend settings (cannot be overridden via UI)
+# 3. Dynamic URL and Cookie Handling
+# If APP_URL is empty or default localhost, unset it so Laravel dynamically uses the request host
+if [ -z "$APP_URL" ] || [ "$APP_URL" = "http://localhost" ] || [ "$APP_URL" = "https://localhost" ]; then
+    unset APP_URL
+fi
+
+# Ensure session cookies work across plain HTTP and Home Assistant Ingress
+export SESSION_SECURE_COOKIE="false"
+
+# 4. Hardcode persistent backend settings (cannot be overridden via UI)
 export DB_CONNECTION="sqlite"
 export DB_DATABASE="/data/weathernode.sqlite"
 export DOCKER_RUN_SCHEDULER="true"
@@ -45,7 +54,7 @@ echo "[WeatherNode] Database connection configured to SQLite at ${DB_DATABASE}"
 echo "[WeatherNode] Background scheduler execution enabled (DOCKER_RUN_SCHEDULER=true)"
 echo "[WeatherNode] Ingress Administrator configured for seamless Home Assistant access (${ADMIN_EMAIL})"
 
-# 4. Ensure persistent storage path and SQLite database exist with writable permissions
+# 5. Ensure persistent storage path and SQLite database exist with writable permissions
 mkdir -p /data
 touch /data/weathernode.sqlite
 chmod 775 /data || true
@@ -55,11 +64,11 @@ if id "www-data" >/dev/null 2>&1; then
     chown -R www-data:www-data /data || true
 fi
 
-# 5. Fallback default command if none supplied
+# 6. Fallback default command if none supplied
 if [ $# -eq 0 ]; then
     set -- /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 fi
 
-# 6. Hand over control to the upstream WeatherNode entrypoint
+# 7. Hand over control to the upstream WeatherNode entrypoint
 echo "[WeatherNode] Handing over execution to upstream entrypoint: /var/www/html/docker/entrypoint.sh"
 exec /var/www/html/docker/entrypoint.sh "$@"
